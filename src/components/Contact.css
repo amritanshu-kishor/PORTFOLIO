@@ -1,0 +1,123 @@
+.contact-section {
+  padding-bottom: 0; /* Footer handles bottom padding */
+}
+
+.contact-content {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 6rem;
+}
+
+.contact-card {
+  max-width: 800px;
+  width: 100%;
+  padding: 3rem;
+  border-radius: 24px;
+  text-align: center;
+}
+
+.contact-card h3 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.contact-card > p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 400px;
+  margin: 0 auto 3rem auto;
+}
+
+.contact-link {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  text-decoration: none;
+  transition: var(--transition);
+  text-align: left;
+}
+
+.contact-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.contact-icon {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--accent-primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+
+.contact-link:hover .contact-icon {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.contact-link h4 {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  margin-bottom: 0.2rem;
+}
+
+.contact-link p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.contact-btn {
+  font-size: 1.1rem;
+  padding: 1rem 2.5rem;
+}
+
+.footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 2rem 0;
+  background: rgba(10, 10, 14, 0.5);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .contact-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}
