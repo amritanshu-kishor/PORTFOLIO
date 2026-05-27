@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Award, Microscope, Terminal } from 'lucide-react';
+import { BookOpen, Microscope, Terminal } from 'lucide-react';
 import './About.css';
 
 export default function About() {

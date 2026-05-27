@@ -79,9 +79,10 @@
 }
 
 .details-list {
-  list-style-position: inside;
+  list-style: none;
   color: var(--text-secondary);
   font-size: 0.95rem;
+  padding-left: 0;
 }
 
 .details-list li {
@@ -91,11 +92,14 @@
 }
 
 .details-list li::before {
-  content: '•';
-  color: var(--accent-primary);
+  content: '';
   position: absolute;
-  left: 0;
-  font-weight: bold;
+  left: 0.1rem;
+  top: 0.75em;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--accent-primary);
 }
 
 .flex-between {

@@ -1,7 +1,6 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Float, RoundedBox, Cylinder, Sphere, MeshDistortMaterial } from '@react-three/drei';
-import * as THREE from 'three';
 
 export default function Model() {
   const robotRef = useRef();
