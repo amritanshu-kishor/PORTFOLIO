@@ -4,7 +4,7 @@ import './About.css';
 
 export default function About() {
   const skills = [
-    { category: "Languages", items: "Python, JavaScript, HTML/CSS, LaTeX" },
+    { category: "Languages", items: "Python, JavaScript, HTML/CSS, Java" },
     { category: "AI/ML Frameworks", items: "TensorFlow, PyTorch, scikit-learn, NumPy, Pandas" },
     { category: "Frontend Technologies", items: "React, Node.js, Responsive Web Design" },
     { category: "Research & Data", items: "Literature Review, Experimental Design, Data Analysis, NLP" }
