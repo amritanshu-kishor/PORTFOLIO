@@ -46,14 +46,20 @@ document.querySelectorAll('.nav-link').forEach(link => {
 const sections = document.querySelectorAll('section[id]');
 const allNavLinks = document.querySelectorAll('.nav-link');
 
+let navScrollRaf = false;
 function updateActiveNav() {
-  let current = '';
-  sections.forEach(section => {
-    const sectionTop = section.offsetTop - 80;
-    if (window.scrollY >= sectionTop) current = section.getAttribute('id');
-  });
-  allNavLinks.forEach(link => {
-    link.style.color = link.getAttribute('href') === `#${current}` ? '#fff' : '';
+  if (navScrollRaf) return;
+  navScrollRaf = true;
+  requestAnimationFrame(() => {
+    let current = '';
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop - 80;
+      if (window.scrollY >= sectionTop) current = section.getAttribute('id');
+    });
+    allNavLinks.forEach(link => {
+      link.style.color = link.getAttribute('href') === `#${current}` ? '#fff' : '';
+    });
+    navScrollRaf = false;
   });
 }
 window.addEventListener('scroll', updateActiveNav);
@@ -245,10 +251,24 @@ if (splineViewer) {
     } catch (_) {}
   };
 
-  splineViewer.addEventListener('load', cleanWatermark);
-  setTimeout(cleanWatermark, 200);
-  setTimeout(cleanWatermark, 600);
-  setTimeout(cleanWatermark, 1200);
+  // Clean watermark on load and observe for dynamic changes
+  splineViewer.addEventListener('load', () => {
+    cleanWatermark();
+
+    // Set up MutationObserver to catch any dynamically added watermarks
+    if (splineViewer.shadowRoot) {
+      const observer = new MutationObserver(() => cleanWatermark());
+      observer.observe(splineViewer.shadowRoot, { childList: true, subtree: true });
+
+      // Clean up observer after a reasonable time to prevent memory leaks
+      setTimeout(() => observer.disconnect(), 5000);
+    }
+  });
+
+  // Initial clean in case it's already loaded
+  if (splineViewer.complete) {
+    cleanWatermark();
+  }
 }
 
 // ─── CURSOR CUSTOM (hero section only, desktop) ───
@@ -279,6 +299,7 @@ if (window.matchMedia('(pointer: fine)').matches) {
   let cursorX = 0, cursorY = 0;
   let ringX = 0, ringY = 0;
   let inHero = true;
+  let ringAnimationFrame = null;
 
   // Show / hide based on whether we're in the hero section
   const heroEl = document.getElementById('hero');
@@ -290,6 +311,14 @@ if (window.matchMedia('(pointer: fine)').matches) {
     cursorRing.style.opacity = vis;
     // Restore / hide native cursor
     document.body.style.cursor = inHero ? 'none' : '';
+
+    // Stop ring animation when not in hero to save performance
+    if (!inHero && ringAnimationFrame !== null) {
+      cancelAnimationFrame(ringAnimationFrame);
+      ringAnimationFrame = null;
+    } else if (inHero && ringAnimationFrame === null) {
+      animateRing();
+    }
   };
 
   window.addEventListener('scroll', updateCursorScope, { passive: true });
@@ -301,6 +330,14 @@ if (window.matchMedia('(pointer: fine)').matches) {
     if (inHero) {
       cursor.style.left = cursorX + 'px';
       cursor.style.top  = cursorY + 'px';
+
+      // Update ring position immediately for responsiveness
+      if (ringAnimationFrame !== null) {
+        ringX += (cursorX - ringX) * 0.12;
+        ringY += (cursorY - ringY) * 0.12;
+        cursorRing.style.left = ringX + 'px';
+        cursorRing.style.top  = ringY + 'px';
+      }
     }
   }, { passive: true });
 
@@ -310,10 +347,9 @@ if (window.matchMedia('(pointer: fine)').matches) {
       ringY += (cursorY - ringY) * 0.12;
       cursorRing.style.left = ringX + 'px';
       cursorRing.style.top  = ringY + 'px';
+      ringAnimationFrame = requestAnimationFrame(animateRing);
     }
-    requestAnimationFrame(animateRing);
   }
-  animateRing();
 
   // Expand on interactive elements
   document.querySelectorAll('a, button, .project-card, .skill-tag').forEach(el => {
