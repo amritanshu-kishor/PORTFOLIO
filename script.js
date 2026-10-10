@@ -7,12 +7,14 @@ const navbar = document.getElementById('navbar');
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('nav-links');
 
+let scrollRaf = false;
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 40) {
-    navbar.classList.add('scrolled');
-  } else {
-    navbar.classList.remove('scrolled');
-  }
+  if (scrollRaf) return;
+  scrollRaf = true;
+  requestAnimationFrame(() => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+    scrollRaf = false;
+  });
 });
 
 hamburger.addEventListener('click', () => {
@@ -96,15 +98,17 @@ reveals.forEach(el => revealObserver.observe(el));
 const hero = document.getElementById('hero');
 const heroContent = hero.querySelector('.hero-content');
 
+let heroRaf = false;
 hero.addEventListener('mousemove', (e) => {
-  const rect = hero.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const centerX = rect.width / 2;
-  const centerY = rect.height / 2;
-  const rotateX = ((y - centerY) / centerY) * -3;
-  const rotateY = ((x - centerX) / centerX) * 3;
-  heroContent.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  if (heroRaf) return;
+  heroRaf = true;
+  requestAnimationFrame(() => {
+    const rect = hero.getBoundingClientRect();
+    const rotateX = (((e.clientY - rect.top) / rect.height) - 0.5) * -6;
+    const rotateY = (((e.clientX - rect.left) / rect.width) - 0.5) * 6;
+    heroContent.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    heroRaf = false;
+  });
 });
 hero.addEventListener('mouseleave', () => {
   heroContent.style.transform = '';
@@ -112,15 +116,17 @@ hero.addEventListener('mouseleave', () => {
 
 // ─── PROJECT CARDS — TILT ───
 document.querySelectorAll('.project-card').forEach(card => {
+  let cardRaf = false;
   card.addEventListener('mousemove', (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const cx = rect.width / 2;
-    const cy = rect.height / 2;
-    const rotX = ((y - cy) / cy) * -5;
-    const rotY = ((x - cx) / cx) * 5;
-    card.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-6px)`;
+    if (cardRaf) return;
+    cardRaf = true;
+    requestAnimationFrame(() => {
+      const rect = card.getBoundingClientRect();
+      const rotX = (((e.clientY - rect.top) / rect.height) - 0.5) * -8;
+      const rotY = (((e.clientX - rect.left) / rect.width) - 0.5) * 8;
+      card.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-4px)`;
+      cardRaf = false;
+    });
   });
   card.addEventListener('mouseleave', () => {
     card.style.transform = '';
@@ -175,14 +181,16 @@ function showToast(msg, success = true) {
 
 // ─── SCROLL INDICATOR HIDE ───
 const scrollIndicator = document.getElementById('scroll-indicator');
+let indicatorRaf = false;
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 100) {
-    scrollIndicator.style.opacity = '0';
-    scrollIndicator.style.pointerEvents = 'none';
-  } else {
-    scrollIndicator.style.opacity = '1';
-    scrollIndicator.style.pointerEvents = 'auto';
-  }
+  if (indicatorRaf) return;
+  indicatorRaf = true;
+  requestAnimationFrame(() => {
+    const hidden = window.scrollY > 100;
+    scrollIndicator.style.opacity = hidden ? '0' : '1';
+    scrollIndicator.style.pointerEvents = hidden ? 'none' : 'auto';
+    indicatorRaf = false;
+  });
 });
 
 // ─── COUNTER ANIMATION ───
@@ -238,13 +246,12 @@ if (splineViewer) {
   };
 
   splineViewer.addEventListener('load', cleanWatermark);
-  // Polling checks during first few frames to ensure clean look
   setTimeout(cleanWatermark, 200);
   setTimeout(cleanWatermark, 600);
   setTimeout(cleanWatermark, 1200);
 }
 
-// ─── CURSOR CUSTOM (desktop only) ───
+// ─── CURSOR CUSTOM (hero section only, desktop) ───
 if (window.matchMedia('(pointer: fine)').matches) {
   const cursor = document.createElement('div');
   cursor.id = 'custom-cursor';
@@ -265,25 +272,45 @@ if (window.matchMedia('(pointer: fine)').matches) {
     width: 36px; height: 36px;
     border: 1px solid rgba(255,255,255,0.4); border-radius: 50%;
     transform: translate(-50%,-50%);
-    transition: transform 0.3s ease, width 0.3s, height 0.3s;
+    transition: transform 0.3s ease, width 0.3s, height 0.3s, opacity 0.2s;
   `;
   document.body.appendChild(cursorRing);
 
   let cursorX = 0, cursorY = 0;
   let ringX = 0, ringY = 0;
+  let inHero = true;
+
+  // Show / hide based on whether we're in the hero section
+  const heroEl = document.getElementById('hero');
+  const updateCursorScope = () => {
+    const heroBottom = heroEl.offsetTop + heroEl.offsetHeight;
+    inHero = window.scrollY < heroBottom - 80;
+    const vis = inHero ? '1' : '0';
+    cursor.style.opacity = vis;
+    cursorRing.style.opacity = vis;
+    // Restore / hide native cursor
+    document.body.style.cursor = inHero ? 'none' : '';
+  };
+
+  window.addEventListener('scroll', updateCursorScope, { passive: true });
+  updateCursorScope();
 
   document.addEventListener('mousemove', (e) => {
     cursorX = e.clientX;
     cursorY = e.clientY;
-    cursor.style.left = cursorX + 'px';
-    cursor.style.top = cursorY + 'px';
-  });
+    if (inHero) {
+      cursor.style.left = cursorX + 'px';
+      cursor.style.top  = cursorY + 'px';
+    }
+  }, { passive: true });
 
   function animateRing() {
-    ringX += (cursorX - ringX) * 0.12;
-    ringY += (cursorY - ringY) * 0.12;
-    cursorRing.style.left = ringX + 'px';
-    cursorRing.style.top = ringY + 'px';
+    if (inHero) {
+      ringX += (cursorX - ringX) * 0.12;
+      ringY += (cursorY - ringY) * 0.12;
+      cursorRing.style.left = ringX + 'px';
+      cursorRing.style.top  = ringY + 'px';
+    }
     requestAnimationFrame(animateRing);
   }
   animateRing();
@@ -291,15 +318,15 @@ if (window.matchMedia('(pointer: fine)').matches) {
   // Expand on interactive elements
   document.querySelectorAll('a, button, .project-card, .skill-tag').forEach(el => {
     el.addEventListener('mouseenter', () => {
-      cursorRing.style.width = '56px';
+      cursorRing.style.width  = '56px';
       cursorRing.style.height = '56px';
-      cursor.style.width = '6px';
+      cursor.style.width  = '6px';
       cursor.style.height = '6px';
     });
     el.addEventListener('mouseleave', () => {
-      cursorRing.style.width = '36px';
+      cursorRing.style.width  = '36px';
       cursorRing.style.height = '36px';
-      cursor.style.width = '10px';
+      cursor.style.width  = '10px';
       cursor.style.height = '10px';
     });
   });
